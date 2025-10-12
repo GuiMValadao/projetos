@@ -7,6 +7,9 @@ def cadastrar_usuario(nome, data_nascimento, cpf,
     cpf: string contendo somente os números do CPF; apenas um por usuário.
     endereco: string no formato rua, nº - bairro - cidade/sigla estado.
     """
+    while cpf == '':
+        cpf = input('CPF não pode ser nulo, digite novamente.')
+    
     usuario = {
         'nome': nome,
         'data_nascimento': data_nascimento,
