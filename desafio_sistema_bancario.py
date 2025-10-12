@@ -161,122 +161,119 @@ Qual operação deseja realizar?
     escolha = input(menu).lower()
     return escolha
 
+def main():
+    extrato = ''
+    LIMITE = 1000
+    LIMITE_SAQUES = 3
+    usuarios_cadastrados = []
+    contas_cadastradas = []
+    opcao_criar_conta, criar_conta_usuario_existente = '', '' 
 
-extrato = ''
-LIMITE = 1000
-LIMITE_SAQUES = 3
-usuarios_cadastrados = []
-contas_cadastradas = []
-opcao_criar_conta, criar_conta_usuario_existente = '', '' 
+    while True:
 
-while True:
+        opcao = menu_inicial()
 
-    opcao = menu_inicial()
+        if opcao == "c":
+        # Seção para criação de novos usuários e/ou novas contas
+            print("""
+    ------------------
+    -MENU DE CADASTRO-                              
+    ------------------
+    """)
+            novo_usuario = cadastrar_usuario(input('Digite seu nome: '), 
+                                            input('Digite sua data de nascimento: '),
+                                            input('Digite seu cpf: '), 
+                                            input('Digute seu endereço completo: '),
+                                            usuarios_cadastrados)
+            if type(novo_usuario) != dict:
+                criar_conta_usuario_existente = input(
+                    """ 
+    Deseja criar uma nova conta?
+                            
+    1 - Sim
+    2 - Não
+                    
+    => """)             
+                if criar_conta_usuario_existente == '1':
+                    contas_cadastradas.append(criar_conta_corrente(novo_usuario, contas_cadastradas))
+                    print('Conta corrente criada com sucesso.')
+                elif criar_conta_usuario_existente == '2':
+                    print('Criação de contada negada pelo usuário')
+                else:
+                    print('Escolha inválida, retornando ao menu inicial.')
 
-    if opcao == "c":
-    # Seção para criação de novos usuários e/ou novas contas
-        print("""
-------------------
--MENU DE CADASTRO-                              
-------------------
-""")
-        novo_usuario = cadastrar_usuario(input('Digite seu nome: '), 
-                                         input('Digite sua data de nascimento: '),
-                                         input('Digite seu cpf: '), 
-                                         input('Digute seu endereço completo: '),
-                                         usuarios_cadastrados)
-        if type(novo_usuario) != dict:
-            criar_conta_usuario_existente = input(
-                """ 
-Deseja criar uma nova conta?
-                        
-1 - Sim
-2 - Não
-                
-=> """)             
-            if criar_conta_usuario_existente == '1':
-                contas_cadastradas.append(criar_conta_corrente(novo_usuario, contas_cadastradas))
-                print('Conta corrente criada com sucesso.')
-            elif criar_conta_usuario_existente == '2':
-                print('Criação de contada negada pelo usuário')
             else:
-                print('Escolha inválida, retornando ao menu inicial.')
+                usuarios_cadastrados.append(novo_usuario)
+                opcao_criar_conta = input(
+                    """Usuário criado com sucesso. Deseja criar uma conta?
+                            
+    1 - Sim
+    2 - Não
+                    
+    => """)
+                if opcao_criar_conta == '1':
+                    contas_cadastradas.append(criar_conta_corrente(novo_usuario['cpf'], contas_cadastradas, extrato))
+                    print('Conta corrente criada com sucesso.')    
+                elif opcao_criar_conta == '2':          
+                    print('Criação de contada negada pelo usuário')
+                else:
+                    print('Escolha inválida, retornando ao menu inicial.')
+
+        elif opcao == "e":
+            cpf = input(" Informe seu CPF: ")
+            for conta in contas_cadastradas:
+                conta_acessada = False
+                if cpf == conta['cpf']:
+                    conta_acessada = True
+                    while True:                
+                        opcao2 = menu_escolha_transacao()
+                        if opcao2 == "d":
+                            conta['saldo'], conta['extrato']  = \
+                            deposito(
+                                    saldo = conta['saldo'], 
+                                    valor = float(input("Informe o valor do depósito: ")),
+                                    extrato = conta['extrato']
+                                    )
+
+                        elif opcao2 == "s":
+                            conta['saldo'],conta['extrato'],conta['numero_saques'] = \
+                            saque(
+                                saldo = conta['saldo'],
+                                valor = float(input("Informe o valor do saque: ")),
+                                extrato = conta['extrato'],
+                                limite = LIMITE,
+                                numero_saques = conta['numero_saques'],
+                                LIMITE_SAQUES = LIMITE_SAQUES
+                                )
+                            
+                        elif opcao2 == "e":
+                            print("""
+    ---------
+    -EXTRATO-
+    ---------\n          
+    """)
+                            print(conta['extrato'])
+                            print('_'*20)
+                            print(f"Saldo: R$ {conta['saldo']:.2f}\n")
+
+                        elif opcao2 == "q":
+                            print("Obrigado por ser nosso cliente!")
+                            break
+
+                        else:
+                            print('Escolha inválida, escolha a transação apropriada.')
+
+            if  conta_acessada == False:
+                print('Conta não cadastrada.')
+
+        elif opcao == "q":
+            print(" Tenha um bom dia.")
+            break
 
         else:
-            usuarios_cadastrados.append(novo_usuario)
-            opcao_criar_conta = input(
-                """Usuário criado com sucesso. Deseja criar uma conta?
-                        
-1 - Sim
-2 - Não
-                
-=> """)
-            if opcao_criar_conta == '1':
-                contas_cadastradas.append(criar_conta_corrente(novo_usuario['cpf'], contas_cadastradas, extrato))
-                print('Conta corrente criada com sucesso.')    
-            elif opcao_criar_conta == '2':          
-                print('Criação de contada negada pelo usuário')
-            else:
-                print('Escolha inválida, retornando ao menu inicial.')
+            print("Opção inválida. Escolha entre os valores disponíveis.")
 
-    elif opcao == "e":
-        cpf = input(" Informe seu CPF: ")
-        for conta in contas_cadastradas:
-            conta_acessada = False
-            if cpf == conta['cpf']:
-                conta_acessada = True
-                while True:                
-                    opcao2 = menu_escolha_transacao()
-                    if opcao2 == "d":
-                        depositado = deposito(
-                                saldo = conta['saldo'], 
-                                valor = float(input("Informe o valor do depósito: ")),
-                                extrato = conta['extrato']
-                                )
-                        conta['saldo'] = depositado[0]
-                        conta['extrato'] = depositado[1]
-
-                    elif opcao2 == "s":
-                        sacado = saque(
-                            saldo = conta['saldo'],
-                            valor = float(input("Informe o valor do saque: ")),
-                            extrato = conta['extrato'],
-                            limite = LIMITE,
-                            numero_saques = conta['numero_saques'],
-                            LIMITE_SAQUES = LIMITE_SAQUES
-                            )
-                        conta['saldo'] = sacado[0]
-                        conta['extrato'] = sacado[1]
-                        conta['numero_saques'] = sacado[2]
-                        
-                    elif opcao2 == "e":
-                        print("""
----------
--EXTRATO-
----------\n          
-""")
-                        print(conta['extrato'])
-                        print('_'*20)
-                        print(f"Saldo: R$ {conta['saldo']:.2f}\n")
-
-                    elif opcao2 == "q":
-                        print("Obrigado por ser nosso cliente!")
-                        break
-
-                    else:
-                        print('Escolha inválida, escolha a transação apropriada.')
-
-        if  conta_acessada == False:
-            print('Conta não cadastrada.')
-
-    elif opcao == "q":
-        print(" Tenha um bom dia.")
-        break
-
-    else:
-        print("Opção inválida. Escolha entre os valores disponíveis.")
-
-
+main()
 
 
     
