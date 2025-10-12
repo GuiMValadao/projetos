@@ -169,11 +169,50 @@ Qual operação deseja realizar?
 [d] Depositar
 [s] Sacar
 [e] Extrato
+[i] Exibir dados da conta
 [q] Retornar ao menu inicial
+
 
 => """
     escolha = input(menu).lower()
     return escolha
+
+def filtrar_por_cpf(conta, cpf):
+    """
+    Esta função filtra as contas existentes buscando valores
+    de cpf existentes nas contas criadas e retorna uma lista
+    com essas contas.
+    """
+    numero_contas = [x for x in conta if x['cpf'] == cpf]
+    return numero_contas if numero_contas else None
+
+def combinar_cpf_nome(arquivo_usuario, arquivo_contas):
+    """
+    Esta função combina os dicionários de contas e de usuarios
+    e retorna o dicionário completo. Pode ser usado para 
+    chamar o usuário pelo nome, por exemplo.
+    """
+    usuarios_contas = []
+    for conta in arquivo_contas:
+        for usuario in arquivo_usuario:
+            if conta['cpf'] == usuario['cpf']:
+                conta.update(usuario)
+                usuarios_contas.append(conta)
+    return usuarios_contas
+
+def exibir_informacoes(conta_completa):
+    print(f"""
+------------------
+*   Nome:               {conta_completa['nome']}
+*   Data de nascimento: {conta_completa['data_nascimento']}
+*   CPF:                {conta_completa['cpf']}
+*   Endereço:           {conta_completa['endereco']}      
+*   Número da conta:    {conta_completa['numero_da_conta']} 
+*   Agência:            {conta_completa['agencia']} 
+*   Número de saques:   {conta_completa['numero_saques']}
+*   Saldo:              {conta_completa['saldo']}
+------------------
+""")
 
 def main():
     extrato = ''
@@ -209,7 +248,7 @@ def main():
                     
     => """)             
                 if criar_conta_usuario_existente == '1':
-                    contas_cadastradas.append(criar_conta_corrente(novo_usuario, contas_cadastradas))
+                    contas_cadastradas.append(criar_conta_corrente(novo_usuario, contas_cadastradas, extrato))
                     print('Conta corrente criada com sucesso.')
                 elif criar_conta_usuario_existente == '2':
                     print('Criação de contada negada pelo usuário')
@@ -235,9 +274,22 @@ def main():
 
         elif opcao == "e":
             cpf = input(" Informe seu CPF: ")
-            for conta in contas_cadastradas:
+            conta_filtrada = filtrar_por_cpf(conta= contas_cadastradas, cpf = cpf)
+            if conta_filtrada == None:
+                print('Conta não cadastrada.')
+            
+            elif len(conta_filtrada) > 1:
+                print('Múltiplas contas existentes:\n')
+                print([f'Conta: {num_conta['numero_da_conta']}' for num_conta in conta_filtrada])
+                numero_conta_escolhida = int(input('\nQual conta quer utilizar?'))
                 conta_acessada = False
-                if cpf == conta['cpf']:
+            else:
+                numero_conta_escolhida = conta_filtrada[0]['numero_da_conta']
+
+            dados_completos = combinar_cpf_nome(usuarios_cadastrados, conta_filtrada)
+            for conta in dados_completos:
+                if numero_conta_escolhida == conta['numero_da_conta']:
+                    print(f"Bem vindo {conta['nome']}, você está na conta {conta['numero_da_conta']}")
                     conta_acessada = True
                     while True:                
                         opcao2 = menu_escolha_transacao()
@@ -262,7 +314,9 @@ def main():
                             
                         elif opcao2 == "e":
                             print(exibir_extrato(conta))
-
+                        
+                        elif opcao2 == "i":
+                            print(exibir_informacoes(conta))
                         elif opcao2 == "q":
                             print("Obrigado por ser nosso cliente!")
                             break
