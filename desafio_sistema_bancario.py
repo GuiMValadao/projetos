@@ -48,7 +48,7 @@ def criar_conta_corrente(cpf, contas_cadastradas, extrato):
         conta['numero_da_conta'] = ultima_conta + 1        
     return conta
 
-def saque(saldo, valor, extrato, limite, 
+def saque(*, saldo, valor, extrato, limite, 
           numero_saques, LIMITE_SAQUES):
     """ 
     Função que permite um usuário realizar saque.
@@ -84,7 +84,7 @@ def saque(saldo, valor, extrato, limite,
 
     elif valor > 0:
         saldo -= valor
-        extrato = modificar_extrato(extrato, 'Saque', valor)
+        extrato = modificar_extrato(extrato, operacao = 'Saque', valor = valor)
         numero_saques += 1
 
     else:
@@ -119,8 +119,22 @@ def modificar_extrato(extrato, operacao, valor):
     saldo: saldo da conta.
     extrato: histórico de transações.
     """
-    extrato += f"{operacao}: R$ {valor:.2f}\n"
+    if operacao.lower() == 'saque':
+        extrato += f"{operacao}: \t\tR$ {valor:.2f}\n"
+    else:
+        extrato += f"{operacao}: \tR$ {valor:.2f}\n"
+    
     return extrato
+
+def exibir_extrato(conta):
+    print("""
+---------------------------
+----------EXTRATO----------
+---------------------------\n          
+    """)
+    print(conta['extrato'])
+    print('_'*30)
+    print(f"Saldo: \t\tR$ {conta['saldo']:.2f}\n")
 
 def menu_inicial():
     """
@@ -247,14 +261,7 @@ def main():
                                 )
                             
                         elif opcao2 == "e":
-                            print("""
-    ---------
-    -EXTRATO-
-    ---------\n          
-    """)
-                            print(conta['extrato'])
-                            print('_'*20)
-                            print(f"Saldo: R$ {conta['saldo']:.2f}\n")
+                            print(exibir_extrato(conta))
 
                         elif opcao2 == "q":
                             print("Obrigado por ser nosso cliente!")
