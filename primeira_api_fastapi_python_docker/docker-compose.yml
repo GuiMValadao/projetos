@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 services:
   db:
     image: postgres
@@ -6,4 +7,14 @@ services:
       POSTGRES_USER: workout
       POSTGRES_DB: workout
     ports:
+=======
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: workout
+      POSTGRES_USER: workout
+      POSTGRES_DB: workout
+    ports:
+>>>>>>> 9e50be3a49701ce9c08b289a60135d291fc6a2fe
       - "5432:5432"
