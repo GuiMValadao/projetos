@@ -1,8 +1,18 @@
+from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 from src.exceptions import NotFoundPostError
 from src.controllers import auth, post
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from src.database import database, engine, metadata
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await database.connect()
+    yield
+    await database.disconnect()
+
 
 tags_metadata = [
     {
@@ -48,6 +58,7 @@ Você poderá:
     servers=servers,
     redoc_url=None,
     # openapi_url=None,   # disable docs
+    lifespan=lifespan,
 )
 
 app.add_middleware(
