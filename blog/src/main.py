@@ -65,7 +65,7 @@ Você poderá:
     lifespan=lifespan,
 )
 
-app.middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
