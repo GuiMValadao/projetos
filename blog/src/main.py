@@ -3,8 +3,9 @@ from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 from src.exceptions import NotFoundPostError
 from src.controllers import auth, post
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request
 from src.database import database, metadata, engine
+from fastapi.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager
@@ -62,6 +63,14 @@ Você poderá:
     redoc_url=None,
     # openapi_url=None,   # disable docs
     lifespan=lifespan,
+)
+
+app.middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.include_router(auth.router, tags=["auth"])
 app.include_router(post.router, tags=["post"])
